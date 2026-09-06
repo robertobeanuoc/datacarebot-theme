@@ -3,36 +3,36 @@
   "apps": [
     {
       "id": "chat",
-      "brand": "Health",
+      "brand": "DataCareBot",
       "accent": "Chat",
-      "url": "https://192.168.0.59:8888",
+      "url": "https://chat.datacarebot.com",
       "icon": "bi-heart-pulse-fill",
       "emoji": "🩺",
       "authentik_group": "app-chat"
     },
     {
       "id": "strava",
-      "brand": "Strava",
-      "accent": "Dashboard",
-      "url": "https://192.168.0.59:5011",
+      "brand": "DataCareBot",
+      "accent": "Activity",
+      "url": "https://activity.datacarebot.com",
       "icon": "bi-bicycle",
       "emoji": "🚴",
       "authentik_group": "app-strava"
     },
     {
       "id": "cgm",
-      "brand": "CGM",
-      "accent": "Dashboard",
-      "url": "https://192.168.0.59:8502",
+      "brand": "DataCareBot",
+      "accent": "CGM",
+      "url": "https://cgm.datacarebot.com",
       "icon": "bi-droplet-half",
       "emoji": "🩸",
       "authentik_group": "app-cgm"
     },
     {
       "id": "food",
-      "brand": "Nutri",
-      "accent": "Scan",
-      "url": "https://192.168.0.59:5010",
+      "brand": "DataCareBot",
+      "accent": "Food",
+      "url": "https://food.datacarebot.com",
       "icon": "bi-leaf-fill",
       "emoji": "🥗",
       "authentik_group": "app-food"
