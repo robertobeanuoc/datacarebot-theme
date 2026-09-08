@@ -34,7 +34,15 @@
   var currentAppId = mount.dataset.currentApp || "";
   var userGroups = window.__USER_GROUPS__ || [];
 
-  fetch(APPS_URL)
+  // no-store: jsDelivr serves apps.json with Cache-Control: max-age=604800
+  // (7 days) even on the @main pin - without this, a browser that already
+  // fetched it once keeps using that copy for a week regardless of how
+  // often the file itself changes, silently showing stale app names/URLs
+  // (caught live: a browser kept showing pre-rename app names and LAN IPs
+  // for apps already moved behind the Cloudflare tunnel). This only
+  // bypasses the BROWSER's cache for this one small fetch - jsDelivr's own
+  // edge cache (which a repo push/purge does invalidate) still applies.
+  fetch(APPS_URL, { cache: "no-store" })
     .then(function (resp) { return resp.json(); })
     .then(function (data) {
       var apps = (data.apps || []).filter(function (app) {
