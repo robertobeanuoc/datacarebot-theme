@@ -116,11 +116,12 @@ tokens (`var(--ns-primary)`, etc.) without polluting the shared file.
 
 ```bash
 git commit -am "..."
-git tag v1.3.0
-git push && git push --tags
+./scripts/release.sh v1.10.0
 ```
 
-Then update the pinned `@vX.Y.Z` in whichever apps should pick it up.
+Tags this repo, computes the Subresource Integrity (SRI) hash for `app.css`/`switcher.js` at that tag, and opens one PR per consumer app (`datacarebot-food`/`-chat`/`-activity`) bumping both the version pin and the SRI hash together - every app that loads either file pins it with an `integrity="sha384-..."` attribute (see the security audit), so the hash has to travel with the version, not be updated separately by hand. Requires the 3 consumer repos checked out as siblings of this one; review and merge each PR yourself, then redeploy (`docker compose up -d --build`) in each app - the pin is baked into the image, a plain restart won't pick it up.
+
+Doing it by hand instead: `git tag vX.Y.Z && git push --tags`, then in each app update the pinned `@vX.Y.Z` **and** recompute+update its `integrity="sha384-..."` (`openssl dgst -sha384 -binary <file> | openssl base64 -A`, hash the local file at that tag - not the CDN, no propagation delay to race).
 
 ## Releasing an `apps.json` change
 
