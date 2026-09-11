@@ -11,7 +11,7 @@
  *
  *   <li class="nav-item" id="app-switcher" data-current-app="chat"></li>
  *   <script>window.__USER_GROUPS__ = {{ session.user.groups | tojson }};</script>
- *   <script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.3.0/switcher.js" defer></script>
+ *   <script src="https://cdn.jsdelivr.net/gh/robertobeanuoc/datacarebot-theme@v1.9.0/switcher.js" defer></script>
  *
  * Needs Bootstrap 5's JS bundle already on the page for the dropdown to
  * open (every app in this family already loads it for the navbar collapse
@@ -53,23 +53,59 @@
         return;
       }
 
-      var items = apps
-        .map(function (app) {
-          return (
-            '<li><a class="dropdown-item" href="' + app.url + '" target="_blank" rel="noopener noreferrer">' +
-            '<i class="bi ' + app.icon + ' me-2"></i>' + app.brand + app.accent +
-            "</a></li>"
-          );
-        })
-        .join("");
+      // Built with the DOM API - never string-templated into innerHTML -
+      // because apps.json is fetched from a public repo (@main, not a
+      // pinned tag - see above) with no allowlist on its fields. brand/
+      // accent/icon go through textContent/className, which render
+      // whatever bytes they contain as inert text/class-list tokens, never
+      // as markup, however they're spelled - so a compromised apps.json
+      // can't inject HTML/JS this way. url still needs an explicit scheme
+      // check on top of that: .href isn't a markup sink, but it IS a URL
+      // sink - it would happily run a "javascript:" URI on click even set
+      // via the DOM API, which textContent-style escaping does nothing
+      // against.
+      var list = document.createElement("ul");
+      list.className = "dropdown-menu dropdown-menu-end";
+      apps.forEach(function (app) {
+        if (!/^https:\/\//.test(app.url || "")) return;
 
-      mount.innerHTML =
-        '<div class="dropdown">' +
-        '<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">' +
-        '<i class="bi bi-grid-3x3-gap-fill me-1"></i>Apps' +
-        "</a>" +
-        '<ul class="dropdown-menu dropdown-menu-end">' + items + "</ul>" +
-        "</div>";
+        var icon = document.createElement("i");
+        icon.className = "bi " + (app.icon || "") + " me-2";
+
+        var link = document.createElement("a");
+        link.className = "dropdown-item";
+        link.href = app.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.appendChild(icon);
+        link.appendChild(document.createTextNode((app.brand || "") + (app.accent || "")));
+
+        var item = document.createElement("li");
+        item.appendChild(link);
+        list.appendChild(item);
+      });
+      if (!list.children.length) {
+        mount.remove();
+        return;
+      }
+
+      var toggle = document.createElement("a");
+      toggle.className = "nav-link dropdown-toggle";
+      toggle.href = "#";
+      toggle.setAttribute("role", "button");
+      toggle.setAttribute("data-bs-toggle", "dropdown");
+      toggle.setAttribute("aria-expanded", "false");
+      var toggleIcon = document.createElement("i");
+      toggleIcon.className = "bi bi-grid-3x3-gap-fill me-1";
+      toggle.appendChild(toggleIcon);
+      toggle.appendChild(document.createTextNode("Apps"));
+
+      var dropdown = document.createElement("div");
+      dropdown.className = "dropdown";
+      dropdown.appendChild(toggle);
+      dropdown.appendChild(list);
+
+      mount.replaceChildren(dropdown);
     })
     .catch(function () {
       mount.remove();
